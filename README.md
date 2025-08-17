@@ -28,10 +28,19 @@ MCP Reddit Translator 是一个基于 Model Context Protocol (MCP) 的 Reddit �
 
 ## 快速开始
 
-### 1. 安装依赖
+### 1. 安装 uv（推荐）
+
+本项目使用 `uv` 来管理依赖和运行环境，请先安装 uv：
 
 ```bash
-pip install -r requirements.txt
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# 或使用 pip 安装
+pip install uv
 ```
 
 ### 2. 配置 MCP 客户端
@@ -46,8 +55,18 @@ pip install -r requirements.txt
 {
   "mcpServers": {
     "mcp-reddit-basic": {
-      "command": "python3",
-      "args": ["https://raw.githubusercontent.com/Metres0/mcp-reddit-translator/main/reddit_translator.py"],
+      "command": "uv",
+      "args": [
+        "--quiet",
+        "--with", "requests",
+        "--with", "mcp>=1.0.0", 
+        "run",
+        "--python", "3.11",
+        "--",
+        "python",
+        "-c",
+        "import requests; exec(requests.get('https://raw.githubusercontent.com/Metres0/mcp-reddit-translator/main/reddit_translator.py').text)"
+      ],
       "env": {
         "ENABLE_TRANSLATION": "false"
       }
@@ -64,8 +83,21 @@ pip install -r requirements.txt
 {
   "mcpServers": {
     "mcp-reddit-translator": {
-      "command": "python3",
-      "args": ["https://raw.githubusercontent.com/Metres0/mcp-reddit-translator/main/reddit_translator.py"],
+      "command": "uv",
+      "args": [
+        "--quiet",
+        "--with", "requests",
+        "--with", "mcp>=1.0.0",
+        "--with", "googletrans==4.0.0rc1",
+        "--with", "openai",
+        "--with", "anthropic",
+        "run",
+        "--python", "3.11",
+        "--",
+        "python",
+        "-c",
+        "import requests; exec(requests.get('https://raw.githubusercontent.com/Metres0/mcp-reddit-translator/main/reddit_translator.py').text)"
+      ],
       "env": {
         "TRANSLATION_SERVICE": "google",
         "ENABLE_TRANSLATION": "true",
@@ -98,6 +130,36 @@ pip install -r requirements.txt
 ```
 
 详细配置说明请参考 [TRANSLATION_SETUP.md](TRANSLATION_SETUP.md)。
+
+### 备用方法：本地安装
+
+如果你不想使用 `uv`，也可以下载脚本到本地运行：
+
+```bash
+# 下载脚本
+wget https://raw.githubusercontent.com/Metres0/mcp-reddit-translator/main/reddit_translator.py
+
+# 安装依赖
+pip install -r https://raw.githubusercontent.com/Metres0/mcp-reddit-translator/main/requirements.txt
+```
+
+然后在 MCP 配置中使用本地路径：
+
+```json
+{
+  "mcpServers": {
+    "mcp-reddit-translator": {
+      "command": "python3",
+      "args": ["./reddit_translator.py"],
+      "env": {
+        "TRANSLATION_SERVICE": "google",
+        "ENABLE_TRANSLATION": "true",
+        "ENABLE_CACHE": "true"
+      }
+    }
+  }
+}
+```
 
 ## 支持的工具
 
