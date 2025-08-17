@@ -47,7 +47,7 @@ pip install -r requirements.txt
   "mcpServers": {
     "mcp-reddit-basic": {
       "command": "python3",
-      "args": ["./reddit_translator.py"],
+      "args": ["https://raw.githubusercontent.com/Metres0/mcp-reddit-translator/main/reddit_translator.py"],
       "env": {
         "ENABLE_TRANSLATION": "false"
       }
@@ -65,7 +65,7 @@ pip install -r requirements.txt
   "mcpServers": {
     "mcp-reddit-translator": {
       "command": "python3",
-      "args": ["./reddit_translator.py"],
+      "args": ["https://raw.githubusercontent.com/Metres0/mcp-reddit-translator/main/reddit_translator.py"],
       "env": {
         "TRANSLATION_SERVICE": "google",
         "ENABLE_TRANSLATION": "true",
