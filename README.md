@@ -1,21 +1,30 @@
-# MCP Reddit Translator - 增强版 Reddit 服务器
+# MCP Reddit Translator - Reddit 服务器（基础版 + 翻译增强版）
 
 ## 简介
 
-MCP Reddit Translator 是一个基于 Model Context Protocol (MCP) 的增强版 Reddit 服务器，不仅可以让 AI 助手快速获取 Reddit 的热门帖子和讨论内容，还支持**自动英文到中文翻译**功能，让中文用户更轻松地阅读和理解 Reddit 内容。
+MCP Reddit Translator 是一个基于 Model Context Protocol (MCP) 的 Reddit 服务器，提供两种使用模式：
+
+1. **基础版本**：标准的 Reddit 内容获取功能
+2. **翻译增强版**：在基础功能上增加**自动英文到中文翻译**功能
+
+无论选择哪种模式，都可以让 AI 助手快速获取 Reddit 的热门帖子和讨论内容。翻译增强版特别适合中文用户，让阅读和理解英文 Reddit 内容更加轻松。
 
 ## 主要功能
 
+### 🔧 基础功能（两种模式都支持）
 - 🔥 获取任意 subreddit 的热门话题和讨论内容
 - 📝 抓取帖子详细信息，包括评论和互动数据
 - 🔍 搜索 Reddit 中的相关内容和帖子
 - 🖼️ 支持文本、链接、图集等多种 Reddit 内容类型
+- 🛠️ 提供命令行工具，方便开发者测试和调试
+- 🔌 与 Claude Desktop 等 MCP 客户端无缝集成
+
+### 🌐 翻译增强功能（仅翻译增强版）
 - 🌐 **自动英文到中文翻译**（支持多种翻译服务）
 - 🧠 **智能语言检测**，仅翻译英文内容
 - 💾 **翻译缓存**，提高响应速度
 - 🎛️ **可选翻译**，每个工具都支持启用/禁用翻译功能
-- 🛠️ 提供命令行工具，方便开发者测试和调试
-- 🔌 与 Claude Desktop 等 MCP 客户端无缝集成
+- 🔧 **多服务支持**：Google Translate、DeepL、百度翻译、腾讯翻译、OpenAI GPT
 
 ## 快速开始
 
@@ -27,22 +36,27 @@ pip install -r requirements.txt
 
 ### 2. 配置 MCP 客户端
 
-#### 基础配置（仅 Reddit 功能）
+根据你的需求选择以下配置之一：
 
-将以下配置添加到你的 MCP 客户端配置文件中（如 Claude Desktop 的 `claude_desktop_config.json`）：
+#### 选项 A：基础版本配置（仅 Reddit 功能）
+
+如果你只需要基础的 Reddit 内容获取功能，使用以下配置：
 
 ```json
 {
   "mcpServers": {
-    "mcp-reddit-translator": {
+    "mcp-reddit-basic": {
       "command": "python3",
-      "args": ["./reddit_translator.py"]
+      "args": ["./reddit_translator.py"],
+      "env": {
+        "ENABLE_TRANSLATION": "false"
+      }
     }
   }
 }
 ```
 
-#### 增强配置（带翻译功能）
+#### 选项 B：翻译增强版配置（Reddit + 自动翻译）
 
 如需启用自动翻译功能，使用以下配置：
 
@@ -112,7 +126,37 @@ pip install -r requirements.txt
 
 ## 使用示例
 
-### 1. 获取热门帖子（基础功能）
+### 基础版本使用示例
+
+#### 1. 获取热门帖子（基础版本）
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "fetch_hot_threads",
+    "arguments": {
+      "subreddit": "python",
+      "limit": 5
+    }
+  }
+}
+```
+
+**输出示例（基础版本）：**
+```
+📍 r/python 热门帖子 (共 5 个):
+
+1. 🔥 What's the best Python framework for beginners?
+   👤 作者: user123 | 👍 1.2k | 💬 234 | 🕒 2024-01-15
+
+2. 🔥 Python 3.12 Performance Improvements
+   👤 作者: dev_user | 👍 856 | 💬 127 | 🕒 2024-01-14
+```
+
+### 翻译增强版使用示例
+
+#### 1. 获取热门帖子（禁用翻译）
 
 ```json
 {
@@ -128,7 +172,7 @@ pip install -r requirements.txt
 }
 ```
 
-**输出示例（无翻译）：**
+**输出示例（禁用翻译）：**
 ```
 📍 r/python 热门帖子 (共 5 个):
 
@@ -139,7 +183,7 @@ pip install -r requirements.txt
    👤 作者: dev_user | 👍 856 | 💬 127 | 🕒 2024-01-14
 ```
 
-### 2. 获取热门帖子（带自动翻译）
+#### 2. 获取热门帖子（启用翻译）
 
 ```json
 {
@@ -155,7 +199,7 @@ pip install -r requirements.txt
 }
 ```
 
-**输出示例（带翻译）：**
+**输出示例（启用翻译）：**
 ```
 📍 r/python 热门帖子 (共 5 个):
 
@@ -168,7 +212,7 @@ pip install -r requirements.txt
    👤 作者: dev_user | 👍 856 | 💬 127 | 🕒 2024-01-14
 ```
 
-### 3. 获取特定帖子详情
+#### 3. 获取特定帖子详情（翻译增强版）
 
 ```json
 {
@@ -183,7 +227,7 @@ pip install -r requirements.txt
 }
 ```
 
-### 4. 搜索帖子
+#### 4. 搜索帖子（翻译增强版）
 
 ```json
 {
@@ -199,22 +243,7 @@ pip install -r requirements.txt
 }
 ```
 
-### 3. 搜索特定主题
-
-```
-用户: 搜索一下关于 AI 和机器学习的最新讨论
-
-AI: 我来搜索相关的讨论...
-
-[调用 search_posts 工具]
-参数: query: "AI machine learning", subreddit: "MachineLearning"
-
-找到以下相关讨论:
-1. "GPT-4 在代码生成方面的新突破"
-2. "机器学习模型部署的最佳实践"
-3. "开源 AI 工具推荐清单"
-...
-```
+> **注意**：基础版本中，所有工具都不包含 `translate` 参数，因为翻译功能被禁用。翻译增强版中，每个工具都支持可选的 `translate` 参数来控制是否启用翻译。
 
 ## 支持的内容类型
 
