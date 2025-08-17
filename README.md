@@ -25,7 +25,24 @@ pip install -r requirements.txt
 
 ### 2. 配置 MCP 客户端
 
+#### 基础配置（仅 Reddit 功能）
+
 将以下配置添加到你的 MCP 客户端配置文件中（如 Claude Desktop 的 `claude_desktop_config.json`）：
+
+```json
+{
+  "mcpServers": {
+    "mcp-reddit-translator": {
+      "command": "python3",
+      "args": ["./reddit_translator.py"]
+    }
+  }
+}
+```
+
+#### 增强配置（带翻译功能）
+
+如需启用自动翻译功能，使用以下配置：
 
 ```json
 {
@@ -68,7 +85,26 @@ pip install -r requirements.txt
 
 ## 使用示例
 
-### 1. 获取热门帖子（带自动翻译）
+### 1. 获取热门帖子
+
+```
+用户: 帮我看看 r/programming 最新的热门帖子
+
+AI: 我来为你获取 r/programming 的热门帖子...
+
+[调用 fetch_hot_threads 工具]
+参数: subreddit: programming
+
+结果显示当前热门话题包括:
+1. "New JavaScript Framework Released" - 1.2k 点赞
+2. "Python 3.12 Performance Optimization Guide" - 890 点赞
+3. "Best Practices for Open Source Project Maintenance" - 756 点赞
+...
+```
+
+### 2. 获取热门帖子（带自动翻译）
+
+当启用翻译功能时，英文标题会自动翻译为中文：
 
 ```
 用户: 帮我看看 r/programming 最新的热门帖子
@@ -88,7 +124,7 @@ AI: 我来为你获取 r/programming 的热门帖子...
 ...
 ```
 
-### 2. 获取特定帖子详情
+### 3. 获取特定帖子详情
 
 ```
 用户: 能详细看看第一个帖子的内容和评论吗？
