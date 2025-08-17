@@ -1,20 +1,74 @@
-# MCP Reddit Server 集成指南
+# MCP Reddit Translator - 增强版 Reddit 服务器
 
 ## 简介
 
-MCP Reddit Server 是一个基于 Model Context Protocol (MCP) 的服务器，可以让 AI 助手快速获取 Reddit 的热门帖子和讨论内容。
+MCP Reddit Translator 是一个基于 Model Context Protocol (MCP) 的增强版 Reddit 服务器，不仅可以让 AI 助手快速获取 Reddit 的热门帖子和讨论内容，还支持**自动英文到中文翻译**功能，让中文用户更轻松地阅读和理解 Reddit 内容。
 
 ## 主要功能
 
 - 🔥 获取任意 subreddit 的热门话题和讨论内容
 - 📝 抓取帖子详细信息，包括评论和互动数据
 - 🖼️ 支持文本、链接、图集等多种 Reddit 内容类型
+- 🌐 **自动英文到中文翻译**（支持多种翻译服务）
+- 🧠 **智能语言检测**，仅翻译英文内容
+- 💾 **翻译缓存**，提高响应速度
 - 🛠️ 提供命令行工具，方便开发者测试和调试
 - 🔌 与 Claude Desktop 等 MCP 客户端无缝集成
 
+## 快速开始
+
+### 1. 安装依赖
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. 配置 MCP 客户端
+
+将以下配置添加到你的 MCP 客户端配置文件中（如 Claude Desktop 的 `claude_desktop_config.json`）：
+
+```json
+{
+  "mcpServers": {
+    "mcp-reddit-translator": {
+      "command": "python3",
+      "args": ["path/to/reddit_translator.py"],
+      "env": {
+        "TRANSLATION_SERVICE": "google",
+        "ENABLE_TRANSLATION": "true",
+        "ENABLE_CACHE": "true"
+      }
+    }
+  }
+}
+```
+
+### 3. 配置翻译服务（可选）
+
+编辑 `translation_config.json` 文件来配置翻译服务：
+
+```json
+{
+  "translation": {
+    "enabled": true,
+    "target_language": "zh",
+    "service": "google",
+    "services": {
+      "google": {
+        "enabled": true,
+        "api_key": "your-google-api-key",
+        "endpoint": "https://translation.googleapis.com/language/translate/v2"
+      }
+    }
+  }
+}
+```
+
+详细配置说明请参考 [TRANSLATION_SETUP.md](TRANSLATION_SETUP.md)。
+
 ## 使用示例
 
-### 1. 获取热门帖子
+### 1. 获取热门帖子（带自动翻译）
 
 ```
 用户: 帮我看看 r/programming 最新的热门帖子
@@ -25,9 +79,12 @@ AI: 我来为你获取 r/programming 的热门帖子...
 参数: subreddit: programming
 
 结果显示当前热门话题包括:
-1. "新的 JavaScript 框架发布" - 1.2k 点赞
-2. "Python 3.12 性能优化详解" - 890 点赞
-3. "开源项目维护的最佳实践" - 756 点赞
+1. "New JavaScript Framework Released" 
+   翻译: "新的 JavaScript 框架发布" - 1.2k 点赞
+2. "Python 3.12 Performance Optimization Guide"
+   翻译: "Python 3.12 性能优化详解" - 890 点赞
+3. "Best Practices for Open Source Project Maintenance"
+   翻译: "开源项目维护的最佳实践" - 756 点赞
 ...
 ```
 
@@ -132,12 +189,46 @@ A: 可能是由于 API 限制或网络问题，稍后重试。
 **Q: 图片无法显示？**
 A: 某些图片可能需要 Reddit 登录才能查看，或者链接已失效。
 
+## 支持的翻译服务
+
+- 🌐 **Google Translate** - 免费额度，高质量翻译
+- 🔷 **DeepL** - 专业翻译，支持更自然的表达
+- 🔵 **百度翻译** - 中文优化，本土化支持
+- 🟢 **腾讯翻译君** - 快速响应，稳定可靠
+- 🤖 **OpenAI GPT** - AI 驱动，上下文理解
+
+## 项目文件说明
+
+- `reddit_translator.py` - 主要的 MCP 服务器文件
+- `translation_config.json` - 翻译服务配置文件
+- `mcp_config.json` - MCP 客户端配置示例
+- `requirements.txt` - Python 依赖列表
+- `TRANSLATION_SETUP.md` - 详细的翻译配置指南
+- `INSTALLATION.md` - 安装和部署指南
+
+## 测试和验证
+
+运行测试脚本验证功能：
+
+```bash
+# 基础功能测试
+python3 test_reddit_mcp.py
+
+# 翻译功能测试
+python3 test_translation.py
+
+# 演示脚本
+python3 demo.py
+```
+
 ## 更多资源
 
-- [GitHub 项目地址](https://github.com/adhikasp/mcp-reddit)
+- [GitHub 项目地址](https://github.com/Metres0/mcp-reddit-translator)
 - [MCP 协议文档](https://modelcontextprotocol.io/)
 - [Reddit API 文档](https://www.reddit.com/dev/api/)
+- [翻译配置指南](TRANSLATION_SETUP.md)
+- [安装部署指南](INSTALLATION.md)
 
 ---
 
-通过 MCP Reddit Server，你可以轻松地让 AI 助手帮你浏览和分析 Reddit 上的热门内容，获取最新的技术动态、新闻资讯和社区讨论。
+通过 MCP Reddit Translator，你可以轻松地让 AI 助手帮你浏览和分析 Reddit 上的热门内容，**自动翻译成中文**，获取最新的技术动态、新闻资讯和社区讨论，无需担心语言障碍。
