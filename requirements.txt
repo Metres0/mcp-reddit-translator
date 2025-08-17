@@ -16,6 +16,9 @@ pytest>=7.0.0
 pytest-asyncio>=0.21.0
 
 # 翻译服务特定依赖 / Translation Service Specific Dependencies
+# 默认翻译库 / Default Translation Library
+translate>=3.6.1
+
 # 注意：大部分翻译服务只需要 aiohttp，无需额外依赖
 # Note: Most translation services only require aiohttp, no additional dependencies needed
 

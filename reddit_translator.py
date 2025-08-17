@@ -6,7 +6,8 @@ MCP Reddit Server 增强版 - 带自动翻译功能
 将抓取到的英文内容自动翻译成中文，方便中文用户阅读。
 
 支持的翻译服务:
-- Google Translate (免费)
+- Google Translate (免费，默认)
+- Translate 库 (备选免费方案)
 - DeepL API (高质量)
 - 百度翻译 API
 - 腾讯翻译 API
@@ -27,10 +28,17 @@ from urllib.parse import quote
 import os
 from dataclasses import dataclass
 
+# 尝试导入 translate 库作为备选翻译方案
+try:
+    from translate import Translator
+    TRANSLATE_AVAILABLE = True
+except ImportError:
+    TRANSLATE_AVAILABLE = False
+
 @dataclass
 class TranslationConfig:
     """翻译配置类"""
-    service: str = "google"  # google, deepl, baidu, tencent, openai
+    service: str = "google"  # google, translate, deepl, baidu, tencent, openai
     api_key: Optional[str] = None
     secret_key: Optional[str] = None
     endpoint: Optional[str] = None
@@ -127,6 +135,25 @@ class GoogleTranslator(TranslationService):
                     return ''.join([item[0] for item in result[0] if item[0]])
         
         raise Exception("Google 翻译请求失败")
+
+class TranslateLibTranslator(TranslationService):
+    """使用 translate 库的翻译服务"""
+    
+    def __init__(self, config: TranslationConfig):
+        super().__init__(config)
+        if not TRANSLATE_AVAILABLE:
+            raise ImportError("translate 库未安装，请运行: pip install translate")
+        self.translator = Translator(to_lang="zh-CN", from_lang="en")
+    
+    async def _translate_impl(self, text: str) -> str:
+        try:
+            # translate 库是同步的，在异步环境中运行
+            import asyncio
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(None, self.translator.translate, text)
+            return result
+        except Exception as e:
+            raise Exception(f"translate 库翻译失败: {str(e)}")
 
 class DeepLTranslator(TranslationService):
     """DeepL 翻译服务"""
@@ -229,7 +256,15 @@ class TranslationManager:
     def _create_translator(self) -> TranslationService:
         """创建翻译服务实例"""
         if self.config.service == "google":
-            return GoogleTranslator(self.config)
+            try:
+                return GoogleTranslator(self.config)
+            except Exception:
+                # 如果 Google 翻译失败，尝试使用 translate 库作为备选
+                if TRANSLATE_AVAILABLE:
+                    return TranslateLibTranslator(self.config)
+                raise
+        elif self.config.service == "translate":
+            return TranslateLibTranslator(self.config)
         elif self.config.service == "deepl":
             return DeepLTranslator(self.config)
         elif self.config.service == "baidu":

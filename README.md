@@ -89,7 +89,7 @@ pip install uv
         "run",
         "--with", "requests",
         "--with", "mcp>=1.0.0",
-        "--with", "googletrans==4.0.0rc1",
+        "--with", "translate",
         "--with", "openai",
         "--with", "anthropic",
         "--python", "3.11",
