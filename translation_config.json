@@ -1,0 +1,90 @@
+{
+  "service": "google",
+  "api_key": null,
+  "secret_key": null,
+  "endpoint": null,
+  "model": null,
+  "enabled": true,
+  "cache_enabled": true,
+  "max_length": 5000,
+  "batch_size": 10,
+  "_comments": {
+    "service": "翻译服务类型: google(免费), deepl, baidu, tencent, openai",
+    "api_key": "API密钥 - 根据选择的服务填写",
+    "secret_key": "密钥 - 百度和腾讯翻译需要",
+    "endpoint": "自定义API端点 - 可选",
+    "model": "模型名称 - OpenAI翻译时使用，如gpt-3.5-turbo",
+    "enabled": "是否启用翻译功能",
+    "cache_enabled": "是否启用翻译缓存",
+    "max_length": "单次翻译最大字符数",
+    "batch_size": "批量翻译时的批次大小"
+  },
+  "service_configs": {
+    "google": {
+      "description": "Google翻译 - 免费，无需API密钥",
+      "setup": "无需配置，直接使用",
+      "quality": "中等",
+      "speed": "快",
+      "cost": "免费"
+    },
+    "deepl": {
+      "description": "DeepL翻译 - 高质量，需要API密钥",
+      "setup": "在DeepL官网注册获取API密钥",
+      "quality": "高",
+      "speed": "中等",
+      "cost": "免费额度500,000字符/月",
+      "api_url": "https://api-free.deepl.com/v2/translate"
+    },
+    "baidu": {
+      "description": "百度翻译 - 国内服务，需要API密钥和密钥",
+      "setup": "在百度翻译开放平台注册获取APP ID和密钥",
+      "quality": "中等",
+      "speed": "快",
+      "cost": "免费额度200万字符/月",
+      "api_url": "https://fanyi-api.baidu.com/api/trans/vip/translate"
+    },
+    "tencent": {
+      "description": "腾讯翻译 - 国内服务，需要SecretId和SecretKey",
+      "setup": "在腾讯云控制台获取SecretId和SecretKey",
+      "quality": "中等",
+      "speed": "快",
+      "cost": "免费额度500万字符/月",
+      "api_url": "https://tmt.tencentcloudapi.com"
+    },
+    "openai": {
+      "description": "OpenAI GPT翻译 - 最高质量，需要API密钥",
+      "setup": "在OpenAI官网获取API密钥",
+      "quality": "最高",
+      "speed": "慢",
+      "cost": "按使用量计费",
+      "api_url": "https://api.openai.com/v1/chat/completions"
+    }
+  },
+  "usage_examples": {
+    "google_free": {
+      "service": "google",
+      "enabled": true,
+      "description": "使用免费Google翻译"
+    },
+    "deepl_api": {
+      "service": "deepl",
+      "api_key": "your-deepl-api-key",
+      "enabled": true,
+      "description": "使用DeepL API翻译"
+    },
+    "baidu_api": {
+      "service": "baidu",
+      "api_key": "your-baidu-app-id",
+      "secret_key": "your-baidu-secret-key",
+      "enabled": true,
+      "description": "使用百度翻译API"
+    },
+    "openai_gpt": {
+      "service": "openai",
+      "api_key": "your-openai-api-key",
+      "model": "gpt-3.5-turbo",
+      "enabled": true,
+      "description": "使用OpenAI GPT翻译"
+    }
+  }
+}

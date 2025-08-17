@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "reddit": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/adhikasp/mcp-reddit.git", "mcp-reddit"],
+      "env": {}
+    },
+    "mcp-reddit-translator": {
+      "command": "python3",
+      "args": ["reddit_translator.py"],
+      "env": {
+        "TRANSLATION_SERVICE": "google",
+        "TRANSLATION_ENABLED": "true",
+        "TRANSLATION_CACHE_ENABLED": "true"
+      }
+    }
+  },
+  "translation": {
+    "enabled": true,
+    "default_service": "google",
+    "config_file": "translation_config.json",
+    "supported_services": ["google", "deepl", "baidu", "tencent", "openai"],
+    "auto_detect_language": true,
+    "target_language": "zh-CN",
+    "cache_translations": true,
+    "batch_processing": true
+  }
+}
