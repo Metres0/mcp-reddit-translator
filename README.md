@@ -8,10 +8,12 @@ MCP Reddit Translator 是一个基于 Model Context Protocol (MCP) 的增强版 
 
 - 🔥 获取任意 subreddit 的热门话题和讨论内容
 - 📝 抓取帖子详细信息，包括评论和互动数据
+- 🔍 搜索 Reddit 中的相关内容和帖子
 - 🖼️ 支持文本、链接、图集等多种 Reddit 内容类型
 - 🌐 **自动英文到中文翻译**（支持多种翻译服务）
 - 🧠 **智能语言检测**，仅翻译英文内容
 - 💾 **翻译缓存**，提高响应速度
+- 🎛️ **可选翻译**，每个工具都支持启用/禁用翻译功能
 - 🛠️ 提供命令行工具，方便开发者测试和调试
 - 🔌 与 Claude Desktop 等 MCP 客户端无缝集成
 
@@ -83,67 +85,118 @@ pip install -r requirements.txt
 
 详细配置说明请参考 [TRANSLATION_SETUP.md](TRANSLATION_SETUP.md)。
 
+## 支持的工具
+
+### 1. fetch_hot_threads
+获取指定 subreddit 的热门帖子
+
+**参数：**
+- `subreddit` (必需): subreddit 名称（不包含 r/ 前缀）
+- `limit` (可选): 返回帖子数量，默认 10，范围 1-50
+- `translate` (可选): 是否启用自动翻译，默认 true
+
+### 2. fetch_post_details
+获取指定帖子的详细信息和评论
+
+**参数：**
+- `post_id` (必需): Reddit 帖子 ID
+- `translate` (可选): 是否启用自动翻译，默认 true
+
+### 3. search_posts
+在 Reddit 中搜索帖子
+
+**参数：**
+- `query` (必需): 搜索关键词
+- `subreddit` (可选): 限制搜索的 subreddit
+- `translate` (可选): 是否启用自动翻译，默认 true
+
 ## 使用示例
 
-### 1. 获取热门帖子
+### 1. 获取热门帖子（基础功能）
 
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "fetch_hot_threads",
+    "arguments": {
+      "subreddit": "python",
+      "limit": 5,
+      "translate": false
+    }
+  }
+}
 ```
-用户: 帮我看看 r/programming 最新的热门帖子
 
-AI: 我来为你获取 r/programming 的热门帖子...
+**输出示例（无翻译）：**
+```
+📍 r/python 热门帖子 (共 5 个):
 
-[调用 fetch_hot_threads 工具]
-参数: subreddit: programming
+1. 🔥 What's the best Python framework for beginners?
+   👤 作者: user123 | 👍 1.2k | 💬 234 | 🕒 2024-01-15
 
-结果显示当前热门话题包括:
-1. "New JavaScript Framework Released" - 1.2k 点赞
-2. "Python 3.12 Performance Optimization Guide" - 890 点赞
-3. "Best Practices for Open Source Project Maintenance" - 756 点赞
-...
+2. 🔥 Python 3.12 Performance Improvements
+   👤 作者: dev_user | 👍 856 | 💬 127 | 🕒 2024-01-14
 ```
 
 ### 2. 获取热门帖子（带自动翻译）
 
-当启用翻译功能时，英文标题会自动翻译为中文：
-
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "fetch_hot_threads",
+    "arguments": {
+      "subreddit": "python",
+      "limit": 5,
+      "translate": true
+    }
+  }
+}
 ```
-用户: 帮我看看 r/programming 最新的热门帖子
 
-AI: 我来为你获取 r/programming 的热门帖子...
+**输出示例（带翻译）：**
+```
+📍 r/python 热门帖子 (共 5 个):
 
-[调用 fetch_hot_threads 工具]
-参数: subreddit: programming
+1. 🔥 What's the best Python framework for beginners?
+   中文: 对于初学者来说，最好的 Python 框架是什么？
+   👤 作者: user123 | 👍 1.2k | 💬 234 | 🕒 2024-01-15
 
-结果显示当前热门话题包括:
-1. "New JavaScript Framework Released" 
-   翻译: "新的 JavaScript 框架发布" - 1.2k 点赞
-2. "Python 3.12 Performance Optimization Guide"
-   翻译: "Python 3.12 性能优化详解" - 890 点赞
-3. "Best Practices for Open Source Project Maintenance"
-   翻译: "开源项目维护的最佳实践" - 756 点赞
-...
+2. 🔥 Python 3.12 Performance Improvements
+   中文: Python 3.12 性能改进
+   👤 作者: dev_user | 👍 856 | 💬 127 | 🕒 2024-01-14
 ```
 
 ### 3. 获取特定帖子详情
 
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "fetch_post_details",
+    "arguments": {
+      "post_id": "abc123",
+      "translate": true
+    }
+  }
+}
 ```
-用户: 能详细看看第一个帖子的内容和评论吗？
 
-AI: 我来获取这个帖子的详细信息...
+### 4. 搜索帖子
 
-[调用 fetch_post_details 工具]
-参数: post_id: xyz123
-
-帖子详情:
-标题: 新的 JavaScript 框架发布
-作者: developer_user
-发布时间: 2小时前
-内容: [完整帖子内容]
-
-热门评论:
-1. "这个框架解决了我们项目的痛点" - 45 点赞
-2. "文档写得很详细，值得尝试" - 32 点赞
-...
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "search_posts",
+    "arguments": {
+      "query": "machine learning",
+      "subreddit": "MachineLearning",
+      "translate": true
+    }
+  }
+}
 ```
 
 ### 3. 搜索特定主题

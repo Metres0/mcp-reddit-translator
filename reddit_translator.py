@@ -544,20 +544,173 @@ def load_translation_config() -> TranslationConfig:
     
     return config
 
-async def main():
-    """主函数"""
-    # 加载翻译配置
-    translation_config = load_translation_config()
+# MCP 协议实现
+import sys
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.types import Tool, TextContent
+
+# 创建 MCP 服务器实例
+app = Server("reddit-translator")
+
+# 全局变量存储 Reddit MCP 实例
+reddit_mcp = None
+
+@app.list_tools()
+async def list_tools() -> list[Tool]:
+    """列出可用的工具"""
+    return [
+        Tool(
+            name="fetch_hot_threads",
+            description="获取指定 subreddit 的热门帖子，支持自动翻译",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "subreddit": {
+                        "type": "string",
+                        "description": "subreddit 名称（不包含 r/ 前缀）"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "返回帖子数量，默认 10",
+                        "default": 10,
+                        "minimum": 1,
+                        "maximum": 50
+                    },
+                    "translate": {
+                        "type": "boolean",
+                        "description": "是否启用自动翻译，默认 true",
+                        "default": True
+                    }
+                },
+                "required": ["subreddit"]
+            }
+        ),
+        Tool(
+            name="fetch_post_details",
+            description="获取指定帖子的详细信息和评论，支持自动翻译",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "post_id": {
+                        "type": "string",
+                        "description": "Reddit 帖子 ID"
+                    },
+                    "translate": {
+                        "type": "boolean",
+                        "description": "是否启用自动翻译，默认 true",
+                        "default": True
+                    }
+                },
+                "required": ["post_id"]
+            }
+        ),
+        Tool(
+            name="search_posts",
+            description="在 Reddit 中搜索帖子，支持自动翻译",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "搜索关键词"
+                    },
+                    "subreddit": {
+                        "type": "string",
+                        "description": "限制搜索的 subreddit（可选）"
+                    },
+                    "translate": {
+                        "type": "boolean",
+                        "description": "是否启用自动翻译，默认 true",
+                        "default": True
+                    }
+                },
+                "required": ["query"]
+            }
+        )
+    ]
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+    """处理工具调用"""
+    global reddit_mcp
     
-    # 创建增强版 Reddit MCP
-    reddit_mcp = EnhancedRedditMCP(translation_config)
+    # 初始化 Reddit MCP 实例（如果还没有）
+    if reddit_mcp is None:
+        translation_config = load_translation_config()
+        reddit_mcp = EnhancedRedditMCP(translation_config)
     
     try:
-        await reddit_mcp.demo_workflow()
-    except KeyboardInterrupt:
-        print("\n\n⏹️ 演示被用户中断")
+        if name == "fetch_hot_threads":
+            subreddit = arguments["subreddit"]
+            limit = arguments.get("limit", 10)
+            translate = arguments.get("translate", True)
+            
+            posts = await reddit_mcp.fetch_hot_threads(subreddit, limit, translate)
+            
+            # 格式化输出
+            result = f"📍 r/{subreddit} 热门帖子 (共 {len(posts)} 个):\n\n"
+            for i, post in enumerate(posts, 1):
+                result += f"{i}. {reddit_mcp.format_post(post, translate)}\n\n"
+            
+            return [TextContent(type="text", text=result)]
+        
+        elif name == "fetch_post_details":
+            post_id = arguments["post_id"]
+            translate = arguments.get("translate", True)
+            
+            post_details = await reddit_mcp.fetch_post_details(post_id, translate)
+            
+            # 格式化输出
+            result = f"📖 帖子详情:\n\n{reddit_mcp.format_post(post_details, translate)}\n\n"
+            
+            if "comments" in post_details and post_details["comments"]:
+                result += f"💬 评论区 (共 {len(post_details['comments'])} 条):\n\n"
+                result += reddit_mcp.format_comments(post_details["comments"], translate)
+            
+            return [TextContent(type="text", text=result)]
+        
+        elif name == "search_posts":
+            query = arguments["query"]
+            subreddit = arguments.get("subreddit")
+            translate = arguments.get("translate", True)
+            
+            posts = await reddit_mcp.search_posts(query, subreddit, translate)
+            
+            # 格式化输出
+            search_scope = f"r/{subreddit}" if subreddit else "全站"
+            result = f"🔍 搜索结果: \"{query}\" 在 {search_scope} (共 {len(posts)} 个):\n\n"
+            
+            for i, post in enumerate(posts, 1):
+                result += f"{i}. {reddit_mcp.format_post(post, translate)}\n\n"
+            
+            return [TextContent(type="text", text=result)]
+        
+        else:
+            return [TextContent(type="text", text=f"❌ 未知工具: {name}")]
+    
     except Exception as e:
-        print(f"\n\n💥 演示过程中发生错误: {str(e)}")
+        error_msg = f"❌ 执行工具 {name} 时发生错误: {str(e)}"
+        return [TextContent(type="text", text=error_msg)]
+
+async def main():
+    """主函数 - 启动 MCP 服务器"""
+    # 检查是否为演示模式
+    if len(sys.argv) > 1 and sys.argv[1] == "--demo":
+        # 演示模式
+        translation_config = load_translation_config()
+        reddit_mcp = EnhancedRedditMCP(translation_config)
+        
+        try:
+            await reddit_mcp.demo_workflow()
+        except KeyboardInterrupt:
+            print("\n\n⏹️ 演示被用户中断")
+        except Exception as e:
+            print(f"\n\n💥 演示过程中发生错误: {str(e)}")
+    else:
+        # MCP 服务器模式
+        async with stdio_server() as (read_stream, write_stream):
+            await app.run(read_stream, write_stream, app.create_initialization_options())
 
 if __name__ == "__main__":
     asyncio.run(main())
