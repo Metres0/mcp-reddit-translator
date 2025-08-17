@@ -32,7 +32,7 @@ pip install -r requirements.txt
   "mcpServers": {
     "mcp-reddit-translator": {
       "command": "python3",
-      "args": ["path/to/reddit_translator.py"],
+      "args": ["./reddit_translator.py"],
       "env": {
         "TRANSLATION_SERVICE": "google",
         "ENABLE_TRANSLATION": "true",
